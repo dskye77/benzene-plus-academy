@@ -28,7 +28,7 @@ export default function Blog() {
           href={`/blog/${featured.slug}`}
           className="group grid md:grid-cols-2 gap-8 rounded-3xl overflow-hidden border border-border bg-card hover:shadow-elevated transition-shadow"
         >
-          <div className="aspect-[16/10] md:aspect-auto overflow-hidden">
+          <div className="aspect-16/10 md:aspect-auto overflow-hidden">
             <Image
               src={tutorImg}
               alt={featured.title}
@@ -64,7 +64,7 @@ export default function Blog() {
               href={`/blog/${p.slug}`}
               className="group rounded-2xl border border-border bg-card overflow-hidden hover:shadow-card transition-shadow"
             >
-              <div className="aspect-[16/9] overflow-hidden">
+              <div className="aspect-video overflow-hidden">
                 <Image
                   src={tutorImg}
                   alt={p.title}
