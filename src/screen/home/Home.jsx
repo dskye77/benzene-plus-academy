@@ -1,16 +1,44 @@
 "use client";
+import { useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { Sparkles, ArrowRight, Star, Trophy, BookOpen, ShieldCheck, Users, Calendar, CheckCircle2 } from "lucide-react";
+import {
+  Sparkles,
+  ArrowRight,
+  Star,
+  Trophy,
+  BookOpen,
+  ShieldCheck,
+  Users,
+  Calendar,
+  CheckCircle2,
+} from "lucide-react";
 
 import heroImg from "@/assets/hero-students.jpg";
 import celebrateImg from "@/assets/students-celebrate.jpg";
 import tutorImg from "@/assets/tutor-teaching.jpg";
 import { Counter } from "@/components/site/Counter";
-import { PROGRAMS, SCORERS, STATS, TESTIMONIALS, POSTS, SITE } from "@/lib/site";
+import {
+  PROGRAMS,
+  SCORERS,
+  STATS,
+  TESTIMONIALS,
+  POSTS,
+  SITE,
+} from "@/lib/site";
+
+import useScorersStore from "@/store/useScorers";
 
 export default function Home() {
+  const { scorers, setYear, fetchPage } = useScorersStore();
+
+  // Fetch initial page of scorers for 2026 on mount
+  useEffect(() => {
+    setYear(2026);
+    fetchPage(1, true);
+  }, [setYear, fetchPage]);
+
   return (
     <>
       {/* HERO */}
@@ -252,7 +280,10 @@ export default function Home() {
               Top scorers
             </p>
             <h2 className="mt-3 text-3xl md:text-4xl font-bold">
-              47 students scored above 300 in JAMB 2025.
+              {/* You can update the headline as needed */}
+              {scorers.length > 0
+                ? `${scorers.length} students scored above 300 in JAMB 2026.`
+                : "Top 2026 JAMB scorers will be announced soon."}
             </h2>
           </div>
           <Link
@@ -263,7 +294,7 @@ export default function Home() {
           </Link>
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {SCORERS.slice(0, 4).map((s) => (
+          {scorers.slice(0, 4).map((s) => (
             <div
               key={s.name}
               className="rounded-2xl border border-border bg-card overflow-hidden hover:shadow-card transition-shadow"
@@ -292,6 +323,11 @@ export default function Home() {
               </div>
             </div>
           ))}
+          {scorers.length === 0 && (
+            <div className="col-span-full text-center text-muted-foreground py-8">
+              No 2026 JAMB scorers have been published yet.
+            </div>
+          )}
         </div>
       </section>
 

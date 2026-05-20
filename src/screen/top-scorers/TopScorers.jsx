@@ -1,23 +1,46 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Search, Trophy } from "lucide-react";
-import { SCORERS } from "@/lib/site";
+import useScorersStore from "@/store/useScorers";
 
+// Exams filter list
 const EXAMS = ["All", "JAMB", "WAEC", "NECO", "Post-UTME"];
+
+// Hardcoded mock years for demo/testing
+const MOCK_YEARS = [2026, 2025, 2024, 2023];
 
 export default function TopScorers() {
   const [q, setQ] = useState("");
   const [exam, setExam] = useState("All");
+  const [selectedYear, setSelectedYear] = useState(MOCK_YEARS[0]);
 
-  const filtered = useMemo(
-    () =>
-      SCORERS.filter(
-        (s) =>
-          (exam === "All" || s.exam === exam) &&
-          s.name.toLowerCase().includes(q.toLowerCase()),
-      ),
-    [q, exam],
-  );
+  const { scorers, loading, error, year, setYear, reload, fetchPage } = useScorersStore();
+
+  // Only use mock years
+  const availableYears = MOCK_YEARS;
+
+  // Fetch initial data on mount, then refetch when year changes
+  useEffect(() => {
+    if (selectedYear != null) {
+      setYear(selectedYear);
+      // Fetch the first page for the selected year, overwrite=true
+      fetchPage(1, true);
+    }
+  }, [selectedYear, setYear, fetchPage]);
+
+  // Filter scorers for year, exam, and query
+  const filtered = useMemo(() => {
+    let data = scorers;
+    if (selectedYear !== null) {
+      data = data.filter((s) => String(s.year) === String(selectedYear));
+    }
+    data = data.filter(
+      (s) =>
+        (exam === "All" || s.exam === exam) &&
+        s.name.toLowerCase().includes(q.toLowerCase()),
+    );
+    return data;
+  }, [scorers, selectedYear, exam, q]);
 
   return (
     <>
@@ -31,8 +54,11 @@ export default function TopScorers() {
             Our top scorers — proof that the structure works.
           </h1>
           <p className="mt-5 max-w-2xl text-white/80 text-lg">
-            <span className="font-bold text-accent">47 students</span> scored
-            above 300 in JAMB 2025. Search the full roll below.
+            <span className="font-bold text-accent">
+              {scorers.length} students
+            </span>{" "}
+            scored above 300 in JAMB {selectedYear || ""}. Search the full roll
+            below.
           </p>
         </div>
       </section>
@@ -65,10 +91,38 @@ export default function TopScorers() {
             ))}
           </div>
         </div>
+
+        {/* Year Badges */}
+        <div className="flex flex-wrap gap-2 mt-5">
+          {MOCK_YEARS.map((yr) => (
+            <button
+              key={yr}
+              onClick={() => setSelectedYear(yr)}
+              className={`px-4 py-1.5 rounded-full text-sm border transition ${
+                selectedYear === yr
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-muted border-border hover:bg-primary/10"
+              }`}
+            >
+              {yr}
+              <span
+                className={`ml-2 text-xs font-medium ${
+                  selectedYear === yr
+                    ? "text-primary-foreground/80"
+                    : "text-muted-foreground"
+                }`}
+              >
+                {scorers.filter((s) => String(s.year) === String(yr)).length}
+              </span>
+            </button>
+          ))}
+        </div>
       </section>
 
       <section className="container-page py-12 md:py-16">
-        {filtered.length === 0 ? (
+        {loading ? (
+          <p className="text-center py-20 text-muted-foreground">Loading…</p>
+        ) : filtered.length === 0 ? (
           <p className="text-center py-20 text-muted-foreground">
             No scorers match your filters.
           </p>

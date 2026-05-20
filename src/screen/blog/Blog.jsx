@@ -7,6 +7,15 @@ import { POSTS } from "@/lib/site";
 export default function Blog() {
   const [featured, ...rest] = POSTS;
 
+  return(
+  <div className="flex flex-col items-center justify-center py-24 text-muted-foreground">
+    <span className="text-5xl mb-4">🚧</span>
+    <h2 className="text-2xl font-bold mb-2">Coming Soon</h2>
+    <p className="text-center max-w-md">
+      The blog feature is coming soon. Check back later!
+    </p>
+  </div>
+  )
   return (
     <>
       <section className="relative gradient-hero text-primary-foreground">
