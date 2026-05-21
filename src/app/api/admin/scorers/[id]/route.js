@@ -1,5 +1,5 @@
-import { admin } from "@/server/firebaseAdmin";
 import { isUserAdmin } from "@/server/firestoreAdmin";
+import { deleteScorer, updateScorer } from "@/server/firestoreAdminScorer";
 import { getUserFromSession } from "@/server/getUserSession";
 
 async function resolveParams(context) {
@@ -26,7 +26,7 @@ export async function DELETE(request, context) {
       return Response.json({ error: "Missing scorer ID" }, { status: 400 });
     }
 
-    await admin.firestore().collection("scorers").doc(id).delete();
+    await deleteScorer(id);
     return Response.json({ success: true }, { status: 200 });
   } catch (error) {
     return Response.json(
@@ -78,7 +78,7 @@ export async function PATCH(request, context) {
       );
     }
 
-    await admin.firestore().collection("scorers").doc(id).update(updates);
+    await updateScorer(id, updates);
     return Response.json({ success: true }, { status: 200 });
   } catch (error) {
     return Response.json(

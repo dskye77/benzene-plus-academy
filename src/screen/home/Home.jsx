@@ -20,12 +20,16 @@ import heroImg from "@/assets/hero-students.jpg";
 import celebrateImg from "@/assets/students-celebrate.jpg";
 import tutorImg from "@/assets/tutor-teaching.jpg";
 import { Counter } from "@/components/site/Counter";
-import { PROGRAMS, STATS, TESTIMONIALS, POSTS, SITE } from "@/lib/site";
+import { PROGRAMS, STATS, TESTIMONIALS, SITE } from "@/lib/site";
 
-import { getAllScorersWithMinScore } from "@/lib/data";
+import { getAllScorersWithMinScore } from "@/lib/client/scorers";
+
+import {  fetchPublishedBlogs } from "@/lib/client/blogs"; 
 
 export default function Home() {
   const [scorers, setScorers] = useState([]);
+  // Add state for fetched posts
+  const [latestPosts, setLatestPosts] = useState([]);
 
   useEffect(() => {
     const getScorers = async () => {
@@ -34,6 +38,17 @@ export default function Home() {
       console.log(data);
     };
     getScorers();
+
+    // Fetch only the latest 3 blog posts
+    const getPosts = async () => {
+      try {
+        const data = await fetchPublishedBlogs({ limit: 3 });
+        setLatestPosts(data || []);
+      } catch (err) {
+        setLatestPosts([]); // fallback if fetch fails
+      }
+    };
+    getPosts();
   }, []);
 
   return (
@@ -371,33 +386,48 @@ export default function Home() {
           </Link>
         </div>
         <div className="grid md:grid-cols-3 gap-5">
-          {POSTS.slice(0, 3).map((p) => (
-            <Link
-              key={p.slug}
-              href={`/blog/${p.slug}`}
-              className="group rounded-2xl border border-border bg-card overflow-hidden hover:shadow-card transition-shadow"
-            >
-              <div className="aspect-video bg-secondary relative overflow-hidden">
-                <Image
-                  src={tutorImg}
-                  alt=""
-                  loading="lazy"
-                  className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-              </div>
-              <div className="p-5">
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-accent">
-                  {p.category}
-                </span>
-                <h3 className="mt-2 text-base font-semibold leading-snug group-hover:text-primary transition-colors">
-                  {p.title}
-                </h3>
-                <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
-                  {p.excerpt}
-                </p>
-              </div>
-            </Link>
-          ))}
+          {/* Only show blog posts if available, otherwise show a fallback message */}
+          {latestPosts.length > 0 ? (
+            latestPosts.map((p) => (
+              <Link
+                key={p.slug}
+                href={`/blog/${p.slug}`}
+                className="group rounded-2xl border border-border bg-card overflow-hidden hover:shadow-card transition-shadow"
+              >
+                <div className="aspect-video bg-secondary relative overflow-hidden">
+                  <Image
+                    src={p.image ?? tutorImg}
+                    width={500}
+                    height={280}
+               
+                    alt=""
+                    loading="lazy"
+                    className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                </div>
+                <div className="p-5">
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-accent">
+                    {p.category}
+                  </span>
+                  <h3 className="mt-2 text-base font-semibold leading-snug group-hover:text-primary transition-colors">
+                    {p.title}
+                  </h3>
+                  <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
+                    {p.excerpt}
+                  </p>
+                </div>
+              </Link>
+            ))
+          ) : (
+            <div className="col-span-full text-center text-muted-foreground py-12">
+              <p className="text-lg font-semibold mb-2">
+                No announcements available
+              </p>
+              <p className="text-sm">
+                Please check back later for the latest news & study tips.
+              </p>
+            </div>
+          )}
         </div>
       </section>
 

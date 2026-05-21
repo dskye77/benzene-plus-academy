@@ -1,4 +1,4 @@
-import { fetchScorers } from "@/lib/firestore";
+import { fetchScorers } from "@/server/firestoreAdminScorer";
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
@@ -28,7 +28,7 @@ export async function GET(request) {
       const scoreB = typeof b.score === "number" ? b.score : -Infinity;
       return scoreB - scoreA;
     });
-    
+
     // Filter out scorers that do not meet the minScore requirement if specified
     let filteredScorers = allScorers;
     if (minScore !== null && minScore !== undefined && minScore !== "") {

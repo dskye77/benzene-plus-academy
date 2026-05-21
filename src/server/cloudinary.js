@@ -28,12 +28,12 @@ export async function uploadImage(source, options) {
   } = options || {};
 
   const response = await cloudinary.uploader.upload(source, {
-    folder,
-    ...(publicId && { public_id: publicId }),
+    ...(publicId ? { public_id: publicId } : { folder }),
     ...(allowedFormats && { allowed_formats: allowedFormats }),
     ...(maxBytes && { max_bytes: maxBytes }),
     ...(transformation && { transformation }),
     resource_type: "image",
+    overwrite: true,
     ...rest,
   });
 
@@ -72,8 +72,8 @@ export async function uploadBuffer(buffer, options) {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
       {
-        folder,
-        ...(publicId && { public_id: publicId }),
+        ...(publicId ? { public_id: publicId } : { folder }),
+        ...(publicId && { overwrite: true }),
         ...(allowedFormats && { allowed_formats: allowedFormats }),
         ...(maxBytes && { max_bytes: maxBytes }),
         ...(transformation && { transformation }),
@@ -81,8 +81,9 @@ export async function uploadBuffer(buffer, options) {
         ...rest,
       },
       (error, result) => {
-        if (error || !result)
+        if (error || !result) {
           return reject(error || new Error("Upload failed"));
+        }
         resolve(mapResponse(result));
       },
     );

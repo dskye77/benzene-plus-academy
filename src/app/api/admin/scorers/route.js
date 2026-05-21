@@ -1,4 +1,6 @@
-import { getAllScorers, isUserAdmin, addScorer } from "@/server/firestoreAdmin";
+import { isUserAdmin } from "@/server/firestoreAdmin";
+
+import { getAllScorers, addScorer } from "@/server/firestoreAdminScorer";
 import { getUserFromSession } from "@/server/getUserSession";
 
 // GET: Fetches all scorers
@@ -16,7 +18,7 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
-    const user = await getUserFromSession()
+    const user = await getUserFromSession();
 
     if (!user || !user.uid) {
       return Response.json(

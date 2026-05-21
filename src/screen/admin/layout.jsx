@@ -1,6 +1,7 @@
 "use client";
 import { useState, useCallback } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -99,8 +100,16 @@ export default function AdminLayout({ children }) {
           href="/"
           className="flex items-center gap-2.5 px-6 h-16 border-b border-border font-display font-bold"
         >
-          <span className="grid h-9 w-9 place-items-center rounded-xl gradient-hero text-primary-foreground">
-            <GraduationCap className="h-5 w-5" />
+          <span className="grid h-10 w-10 place-items-center rounded-xl bg-white ring-1 ring-border overflow-hidden">
+            <Image
+              src="/logo.svg"
+              width={40}
+              height={40}
+         
+              alt="Benzene Plus Academy"
+              className="h-full w-full object-contain"
+              priority
+            />
           </span>
           <span className="text-sm">Benzene Plus</span>
         </Link>

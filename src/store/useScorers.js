@@ -1,7 +1,7 @@
 import { create } from "zustand";
 
 // Optionally, import your paginated fetch function.
-import { getScorersPaginated } from "@/lib/data"; // Update the path as needed
+import { getScorersPaginated } from "@/lib/client/scorers"; // Update the path as needed
 
 /**
  * Zustand store for paginated scorers list.

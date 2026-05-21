@@ -1,64 +1,76 @@
-/**
- * Fetches a paginated array of scorers from the /api/scorers endpoint.
- * @param {number|string} year - The year to fetch scorers for.
- * @param {number} targetPage - The page number to fetch.
- * @param {number} pageSize - The number of scorers per page.
- * @returns {Promise<{scorers: Array<Object>, total: number}>}
- */
-export async function getScorersPaginated(year, targetPage, pageSize) {
-  const params = new URLSearchParams({
-    year: Number(year),
-    page: String(targetPage),
-    pageSize: String(pageSize),
-  });
 
-  const res = await fetch(`/api/scorers?${params.toString()}`, {
-    method: "GET",
-  });
-
-  if (!res.ok) {
-    const { error, details } = await res.json().catch(() => ({}));
-    throw new Error(
-      error
-        ? `${error}${details ? ": " + details : ""}`
-        : "Failed to fetch scorers (paginated)",
-    );
-  }
-
-  const data = await res.json();
-  return { scorers: data.scorers || [], total: data.total || 0 };
-}
-
-/**
- * Fetches all scorers for a given year, with an optional minScore filter.
- * @param {number} year - The year to fetch scorers for.
- * @param {number} [minScore] - Optional minimum score to filter scorers.
- * @returns {Promise<{scorers: Array<Object>, total: number}>}
- */
-export async function getAllScorersWithMinScore(year, minScore) {
-  const params = new URLSearchParams({
-    year: Number(year),
-  });
-  if (minScore !== undefined && minScore !== null && minScore !== "") {
-    params.append("minScore", Number(minScore));
-  }
-
-  const res = await fetch(`/api/scorers?${params.toString()}`, {
-    method: "GET",
-  });
-
-  if (!res.ok) {
-    const { error, details } = await res.json().catch(() => ({}));
-    throw new Error(
-      error
-        ? `${error}${details ? ": " + details : ""}`
-        : "Failed to fetch scorers (minScore)",
-    );
-  }
-
-  const data = await res.json();
-  return { scorers: data.scorers || [], total: data.total || 0 };
-}
 
 const CURRENT_YEAR = new Date().getFullYear();
 export const YEARS = Array.from({ length: 12 }, (_, i) => CURRENT_YEAR - i);
+
+export const EXAM_TYPES = ["JAMB", "WAEC", "NECO", "Post-UTME", "Other"];
+
+export const JAMB_SUBJECTS = [
+  "Accounting",
+  "Agricultural Science",
+  "Biology",
+  "Chemistry",
+  "Christian Religious Studies",
+  "Civic Education",
+  "Commerce",
+  "Computer Science",
+  "Economics",
+  "English Language",
+  "Further Mathematics",
+  "Geography",
+  "Government",
+  "History",
+  "Home Economics",
+  "Islamic Religious Studies",
+  "Literature in English",
+  "Mathematics",
+  "Physical & Health Education",
+  "Physics",
+  "Technical Drawing",
+];
+
+export const WAEC_NECO_SUBJECTS = [
+  "Accounting",
+  "Agricultural Science",
+  "Animal Husbandry",
+  "Biology",
+  "Chemistry",
+  "Christian Religious Studies",
+  "Civic Education",
+  "Commerce",
+  "Computer Science",
+  "Data Processing",
+  "Economics",
+  "English Language",
+  "Fine Art",
+  "Fisheries",
+  "Food and Nutrition",
+  "French",
+  "Further Mathematics",
+  "Geography",
+  "Government",
+  "Hausa",
+  "Health Science",
+  "History",
+  "Home Economics",
+  "Igbo",
+  "Islamic Religious Studies",
+  "Literature in English",
+  "Mathematics",
+  "Physical & Health Education",
+  "Physics",
+  "Technical Drawing",
+  "Visual Art",
+  "Yoruba",
+];
+
+export const WAEC_GRADES = ["A1", "B2", "B3", "C4", "C5", "C6", "D7", "E8", "F9"];
+
+export const SORT_OPTIONS = [
+  { value: "score-desc", label: "Score (High to Low)" },
+  { value: "score-asc", label: "Score (Low to High)" },
+  { value: "name-asc", label: "Name (A–Z)" },
+  { value: "name-desc", label: "Name (Z–A)" },
+  { value: "exam-asc", label: "Exam (A–Z)" },
+  { value: "exam-desc", label: "Exam (Z–A)" },
+];

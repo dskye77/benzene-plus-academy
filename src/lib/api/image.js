@@ -1,30 +1,18 @@
-/**
- * Upload an image file to the admin upload API.
- *
- * @param {File|Blob} file - The file to upload (from an <input type="file"> or drop event).
- * @param {Object} options - Optional. { folder?: string, publicId?: string }
- * @returns {Promise<Object>} - Resolves with the API result { success, data } or throws on error.
- */
-export async function uploadImage(file, options = {}) {
-  const { folder, publicId } = options;
+// Helper to upload image file via /api/admin/uploadImage (see @file_context_0)
+export async function uploadImageViaApi(imageFile, opts = {}) {
   const formData = new FormData();
-  formData.append("file", file);
-  if (folder) formData.append("folder", folder);
-  if (publicId) formData.append("publicId", publicId);
+  formData.append("file", imageFile);
+  if (opts.folder) formData.append("folder", opts.folder);
+  if (opts.publicId) formData.append("publicId", opts.publicId);
 
-  const response = await fetch("/api/admin/uploadImage", {
+  const res = await fetch("/api/admin/uploadImage", {
     method: "POST",
     body: formData,
   });
 
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}));
-    throw new Error(
-      err?.error
-        ? `${err.error}${err.details ? ": " + err.details : ""}`
-        : `Upload failed (${response.status})`,
-    );
+  if (!res.ok) {
+    const errorPayload = await res.json().catch(() => ({}));
+    throw new Error(errorPayload?.error || "Failed to upload image");
   }
-
-  return await response.json();
+  return res.json();
 }
