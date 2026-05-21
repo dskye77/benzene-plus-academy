@@ -74,6 +74,8 @@ export default function ManageBlog() {
   const [editingId, setEditingId] = useState(null);
   const [draft, setDraft] = useState(emptyDraft());
   const [previewing, setPreviewing] = useState(null);
+  const [deleteDialogInfo, setDeleteDialogInfo] = useState(null); // {id, title}
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -122,14 +124,26 @@ export default function ManageBlog() {
     setOpen(true);
   }
 
-  async function remove(id) {
-    if (!window.confirm("Delete this post? This cannot be undone.")) return;
+  function openDeleteDialog(id, title) {
+    setDeleteDialogInfo({ id, title });
+  }
+
+  function closeDeleteDialog() {
+    setDeleteDialogInfo(null);
+    setDeleteLoading(false);
+  }
+
+  async function handleDelete() {
+    if (!deleteDialogInfo) return;
+    setDeleteLoading(true);
     try {
-      await deleteBlog(id);
-      setPosts((prev) => prev.filter((p) => p.id !== id));
+      await deleteBlog(deleteDialogInfo.id);
+      setPosts((prev) => prev.filter((p) => p.id !== deleteDialogInfo.id));
       toast.success("Post deleted");
+      closeDeleteDialog();
     } catch (error) {
       toast.error("Failed to delete post");
+      setDeleteLoading(false);
       console.error(error);
     }
   }
@@ -364,7 +378,7 @@ export default function ManageBlog() {
                           <Pencil className="h-4 w-4" />
                         </button>
                         <button
-                          onClick={() => remove(p.id)}
+                          onClick={() => openDeleteDialog(p.id, p.title)}
                           title="Delete"
                           className="h-8 w-8 grid place-items-center rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
                         >
@@ -567,6 +581,48 @@ export default function ManageBlog() {
                 {editingId ? "Update & Publish" : "Publish Now"}
               </Button>
             </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={!!deleteDialogInfo} onOpenChange={(v) => !v && closeDeleteDialog()}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete post?</DialogTitle>
+            <DialogDescription>
+              This cannot be undone. Are you sure you want to permanently delete
+              <span className="font-semibold mx-1">
+                {deleteDialogInfo?.title ? `"${deleteDialogInfo.title}"` : "this post"}
+              </span>
+              ?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 flex-row justify-end">
+            <Button
+              variant="outline"
+              onClick={closeDeleteDialog}
+              disabled={deleteLoading}
+            >
+              <X className="h-4 w-4" /> Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={deleteLoading}
+            >
+              {deleteLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete
+                </>
+              )}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -798,14 +798,14 @@ function AddModal({ open, onClose, onSaved }) {
               type="button"
               onClick={onClose}
               disabled={uploading}
-              className="flex-1 h-11 rounded-xl border text-sm font-medium hover:bg-secondary transition"
+              className="flex-1 h-11 rounded-xl border text-sm font-medium py-2 hover:bg-secondary transition"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={uploading || !exam}
-              className="flex-1 h-11 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 disabled:opacity-50 flex items-center justify-center gap-2"
+              className="flex-1 h-11 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 disabled:opacity-50 flex items-center justify-center gap-2 py-2"
             >
               {uploading && <Loader2 className="h-4 w-4 animate-spin" />}
               {uploading ? "Adding Scorer…" : "Add Scorer"}
