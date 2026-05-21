@@ -3,9 +3,11 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import Image from "next/image";
+import ScorerDisplay from "@/components/ScorerDisplay";
 import { Plus, Pencil, Trash2, Search, X, Save, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+
+import { YEARS } from "@/lib/data";
 
 import useDashboardStore from "@/store/useDashboard";
 
@@ -293,89 +295,82 @@ function ScorerCard({ scorer, onDelete, onEdit }) {
   const [deleting, setDeleting] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
 
+  const note = scorer.note?.trim();
+
   async function handleDelete() {
     setDeleting(true);
+
     try {
       await onDelete(scorer.id, scorer.imagePublicId);
       toast.success("Scorer deleted");
-      setShowDelete(false); // close modal after success
+      setShowDelete(false);
     } catch (err) {
-      toast.error(err.message || "Failed to delete scorer");
+      toast.error(
+        err instanceof Error ? err.message : "Failed to delete scorer",
+      );
     } finally {
       setDeleting(false);
     }
   }
 
-  const initials = scorer.name
-    .split(" ")
-    .map((n) => n[0])
-    .join("");
-
   return (
-    <div className="group rounded-2xl border p-0 flex flex-col items-center relative bg-card shadow-lg overflow-hidden">
-      {/* IMAGE */}
-      <div className="w-full h-[220px] relative bg-gray-100">
-        {scorer.image ? (
-          <Image
-            src={scorer.image}
-            alt={scorer.name}
-            fill
-            className="object-cover rounded-t-2xl"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-4xl font-bold">
-            {initials}
-          </div>
-        )}
+    <>
+      <div className="group relative isolate overflow-hidden rounded-3xl border bg-card shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl">
+        <div className="relative">
+          <ScorerDisplay scorer={scorer} />
+        </div>
+
+        <div className="absolute right-3 top-3 flex gap-2 opacity-100 transition-opacity duration-200 md:opacity-0 md:group-hover:opacity-100">
+          <button
+            type="button"
+            onClick={() => onEdit(scorer)}
+            aria-label="Edit scorer"
+            className="flex h-9 w-9 items-center justify-center rounded-xl border bg-background/80 shadow-sm backdrop-blur-md transition hover:scale-105 hover:bg-background"
+          >
+            <Pencil className="h-4 w-4" />
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setShowDelete(true)}
+            aria-label="Delete scorer"
+            className="flex h-9 w-9 items-center justify-center rounded-xl border border-red-200 bg-background/80 text-red-500 shadow-sm backdrop-blur-md transition hover:scale-105 hover:bg-red-50"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        </div>
       </div>
 
-      {/* CONTENT */}
-      <div className="flex flex-col items-center w-full p-5">
-        <h3 className="font-bold text-lg">{scorer.name}</h3>
-        <span className="mt-2 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
-          {scorer.exam}
-        </span>
-        <p className="mt-3 text-3xl font-bold">{scorer.score}</p>
-      </div>
-
-      {/* ACTIONS */}
-      <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 flex gap-1">
-        <button
-          className="p-2 rounded-lg bg-white/80"
-          onClick={() => onEdit(scorer)}
-        >
-          <Pencil className="h-4 w-4" />
-        </button>
-
-        <button
-          className="p-2 rounded-lg bg-white/80 text-red-500"
-          onClick={() => setShowDelete(true)}
-        >
-          <Trash2 className="h-4 w-4" />
-        </button>
-      </div>
-
-      {/* DELETE MODAL */}
       {showDelete && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-card w-full max-w-sm rounded-2xl p-5 border">
-            <h3 className="font-bold text-lg">Delete Scorer?</h3>
-            <p className="text-sm text-muted-foreground mt-2">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+          onClick={() => !deleting && setShowDelete(false)}
+        >
+          <div
+            className="w-full max-w-sm rounded-3xl border bg-card p-6 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-xl font-semibold">Delete scorer?</h3>
+
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
               This action cannot be undone.
             </p>
 
-            <div className="flex gap-2 mt-5">
+            <div className="mt-6 flex gap-3">
               <button
+                type="button"
                 onClick={() => setShowDelete(false)}
-                className="flex-1 h-10 rounded-xl border"
+                disabled={deleting}
+                className="h-11 flex-1 rounded-2xl border transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Cancel
               </button>
 
               <button
+                type="button"
                 onClick={handleDelete}
                 disabled={deleting}
-                className="flex-1 h-10 rounded-xl bg-red-500 text-white flex items-center justify-center"
+                className="h-11 flex-1 rounded-2xl bg-red-500 font-medium text-white transition hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {deleting ? "Deleting..." : "Delete"}
               </button>
@@ -383,7 +378,7 @@ function ScorerCard({ scorer, onDelete, onEdit }) {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
 /* ─── EDIT MODAL ──────────────────────────────────────────────────────────── */
@@ -391,40 +386,71 @@ function ScorerCard({ scorer, onDelete, onEdit }) {
 function EditModal({ scorer, onClose, onSaved }) {
   const [form, setForm] = useState({
     name: scorer.name || "",
-    exam: scorer.exam || "",
-    score: String(scorer.score || ""),
     year: String(scorer.year || ""),
+    score: String(scorer.score || ""),
     note: scorer.note || "",
   });
+
+  // WAEC/NECO specific
+  const [numDistinctions, setNumDistinctions] = useState(
+    scorer.waecNecoSummary?.distinctions?.toString() || "",
+  );
+  const [numCredits, setNumCredits] = useState(
+    scorer.waecNecoSummary?.credits?.toString() || "",
+  );
+
+  // Subject breakdown (for all types)
+  const [subjects, setSubjects] = useState(scorer.subjectBreakdown || []);
+
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-  };
+  const isWaecOrNeco = scorer.exam === "WAEC" || scorer.exam === "NECO";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
     setError(null);
+
     try {
+      const payload = {
+        name: form.name,
+        score: Number(form.score),
+        year: Number(form.year),
+        note: form.note.trim() || undefined,
+      };
+
+      // Add WAEC/NECO summary if applicable
+      if (isWaecOrNeco) {
+        payload.waecNecoSummary = {
+          distinctions: Number(numDistinctions) || 0,
+          credits: Number(numCredits) || 0,
+        };
+      }
+
+      // Add subject breakdown if exists
+      if (subjects.length > 0) {
+        payload.subjectBreakdown = subjects
+          .filter((s) => s.subject && (s.score || s.grade))
+          .map((s) => ({
+            subject: s.subject,
+            ...(s.score ? { score: Number(s.score) } : {}),
+            ...(s.grade ? { grade: s.grade } : {}),
+          }));
+      }
+
       const res = await fetch(`/api/admin/scorers/${scorer.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: form.name,
-          exam: form.exam,
-          score: Number(form.score),
-          year: Number(form.year),
-          note: form.note,
-        }),
+        body: JSON.stringify(payload),
       });
+
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || "Failed to save");
+        throw new Error(data.error || "Failed to update");
       }
-      toast.success("Scorer updated");
+
+      toast.success("Scorer updated successfully");
       onSaved();
     } catch (err) {
       setError(err.message);
@@ -435,99 +461,147 @@ function EditModal({ scorer, onClose, onSaved }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-md bg-card rounded-2xl border border-border shadow-elevated p-6">
-        <div className="flex items-center justify-between mb-5">
-          <h3 className="font-bold text-lg">Edit Scorer</h3>
+      <div className="w-full max-w-2xl bg-card rounded-2xl border shadow-elevated p-6 max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="font-bold text-xl">Edit Scorer</h3>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg hover:bg-secondary"
+            className="p-2 rounded-lg hover:bg-secondary"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Exam Type (Locked) */}
           <div>
-            <label className="text-xs font-semibold">Name</label>
-            <input
-              name="name"
-              value={form.name}
-              onChange={handleChange}
-              required
-              className="mt-1.5 w-full h-10 rounded-xl border px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-            />
+            <label className="text-xs font-semibold">Exam Type</label>
+            <div className="mt-1.5 px-4 py-3 bg-muted rounded-xl text-sm font-medium">
+              {scorer.exam} • {scorer.year}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Exam type cannot be changed after creation
+            </p>
           </div>
-          <div>
-            <label className="text-xs font-semibold">Exam</label>
-            <input
-              name="exam"
-              value={form.exam}
-              onChange={handleChange}
-              required
-              placeholder="JAMB, WAEC…"
-              className="mt-1.5 w-full h-10 rounded-xl border px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
+
+          {/* Basic Info */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-semibold">Score</label>
+              <label className="text-xs font-semibold">Full Name</label>
               <input
-                name="score"
-                type="number"
-                value={form.score}
-                onChange={handleChange}
+                value={form.name}
+                onChange={(e) =>
+                  setForm((p) => ({ ...p, name: e.target.value }))
+                }
                 required
-                className="mt-1.5 w-full h-10 rounded-xl border px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                className="mt-1.5 w-full h-11 rounded-xl border px-4 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               />
             </div>
+
             <div>
               <label className="text-xs font-semibold">Year</label>
-              <input
-                name="year"
-                type="number"
+              <select
                 value={form.year}
-                onChange={handleChange}
+                onChange={(e) =>
+                  setForm((p) => ({ ...p, year: e.target.value }))
+                }
                 required
-                className="mt-1.5 w-full h-10 rounded-xl border px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-              />
+                className="mt-1.5 w-full h-11 rounded-xl border px-4 text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-white"
+              >
+                <option value="">Select year</option>
+                {YEARS?.map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
+
+          {/* Score / Distinctions Section */}
+          <div className="rounded-2xl border border-border bg-card p-5">
+            <h3 className="font-semibold mb-4">{scorer.exam} Results</h3>
+
+            {isWaecOrNeco ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div>
+                  <label className="text-sm font-semibold">
+                    Number of Distinctions (A1-B3)
+                  </label>
+                  <input
+                    type="number"
+                    value={numDistinctions}
+                    onChange={(e) => setNumDistinctions(e.target.value)}
+                    className="mt-2 w-full h-11 rounded-xl border px-4 text-lg font-semibold"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-semibold">
+                    Number of Credits (C4-C6)
+                  </label>
+                  <input
+                    type="number"
+                    value={numCredits}
+                    onChange={(e) => setNumCredits(e.target.value)}
+                    className="mt-2 w-full h-11 rounded-xl border px-4 text-lg font-semibold"
+                  />
+                </div>
+              </div>
+            ) : (
+              <div>
+                <label className="text-sm font-semibold">
+                  {scorer.exam === "JAMB" ? "Total JAMB Score" : "Score"}
+                </label>
+                <input
+                  type="number"
+                  value={form.score}
+                  onChange={(e) =>
+                    setForm((p) => ({ ...p, score: e.target.value }))
+                  }
+                  required
+                  className="mt-2 w-full h-11 rounded-xl border px-4 text-lg font-semibold"
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Note */}
           <div>
-            <label className="text-xs font-semibold">Note (optional)</label>
-            <input
-              name="note"
+            <label className="text-xs font-semibold">Additional Note</label>
+            <textarea
               value={form.note}
-              onChange={handleChange}
-              placeholder="e.g. 9 A1s"
-              className="mt-1.5 w-full h-10 rounded-xl border px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              onChange={(e) => setForm((p) => ({ ...p, note: e.target.value }))}
+              placeholder="e.g. Outstanding performance, Best in Chemistry..."
+              rows={3}
+              className="mt-1.5 w-full rounded-xl border px-4 py-3 text-sm resize-y min-h-[80px]"
             />
           </div>
 
           {error && (
-            <p className="text-sm text-destructive bg-destructive/10 rounded-lg px-3 py-2">
+            <div className="rounded-xl bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive">
               {error}
-            </p>
+            </div>
           )}
 
-          <div className="flex gap-2 pt-1">
+          <div className="flex gap-3 pt-4">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 h-10 rounded-xl border text-sm font-medium hover:bg-secondary transition"
+              className="flex-1 h-11 rounded-xl border text-sm font-medium hover:bg-secondary transition"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="flex-1 h-10 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 disabled:opacity-50 flex items-center justify-center gap-2 transition"
+              className="flex-1 h-11 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {saving ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 <Save className="h-4 w-4" />
               )}
-              {saving ? "Saving…" : "Save changes"}
+              {saving ? "Saving..." : "Save Changes"}
             </button>
           </div>
         </form>

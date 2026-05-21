@@ -1,7 +1,8 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import ScorerDisplay from "@/components/ScorerDisplay";
 import { motion } from "framer-motion";
 import {
   Sparkles,
@@ -21,15 +22,19 @@ import tutorImg from "@/assets/tutor-teaching.jpg";
 import { Counter } from "@/components/site/Counter";
 import { PROGRAMS, STATS, TESTIMONIALS, POSTS, SITE } from "@/lib/site";
 
-import useScorersStore from "@/store/useScorers";
+import { getAllScorersWithMinScore } from "@/lib/data";
 
 export default function Home() {
-  const { scorers, setYear, fetchPage } = useScorersStore();
+  const [scorers, setScorers] = useState([]);
 
   useEffect(() => {
-    setYear(2026);
-    fetchPage(1, true);
-  }, [setYear, fetchPage]);
+    const getScorers = async () => {
+      const data = await getAllScorersWithMinScore(2026, 300);
+      setScorers(data?.scorers || []);
+      console.log(data);
+    };
+    getScorers();
+  }, []);
 
   return (
     <>
@@ -273,7 +278,7 @@ export default function Home() {
             </p>
             <h2 className="mt-3 text-3xl md:text-4xl font-bold">
               {scorers.length > 0
-                ? `${scorers.length} students scored above 300 in JAMB 2026.`
+                ? `${scorers.length} student${scorers.length === 1 ? "" : "s"} scored above 300 in JAMB 2026.`
                 : "Top 2026 JAMB scorers will be announced soon."}
             </h2>
           </div>
@@ -286,43 +291,7 @@ export default function Home() {
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {scorers.slice(0, 4).map((s) => (
-            <div
-              key={`${s.name}-${s.year}`}
-              className="rounded-2xl border border-border bg-card overflow-hidden hover:shadow-card transition-shadow"
-            >
-              <div className="aspect-4/5 relative">
-                {s.image ? (
-                  <Image
-                    src={s.image}
-                    alt={s.name}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 640px) 50vw, 25vw"
-                  />
-                ) : (
-                  <div className="absolute inset-0 gradient-hero flex items-center justify-center text-5xl font-display font-bold text-white/85">
-                    {s.name
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")}
-                  </div>
-                )}
-                <span className="absolute top-3 left-3 rounded-full bg-accent px-2.5 py-1 text-[10px] font-bold tracking-wider text-accent-foreground">
-                  {s.exam}
-                </span>
-              </div>
-              <div className="p-4">
-                <p className="text-sm font-semibold">{s.name}</p>
-                <div className="mt-1 flex items-baseline justify-between">
-                  <span className="text-2xl font-display font-bold text-primary">
-                    {s.score}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {s.year}
-                  </span>
-                </div>
-              </div>
-            </div>
+            <ScorerDisplay key={`${s.name}-${s.year}`} scorer={s} />
           ))}
           {scorers.length === 0 && (
             <div className="col-span-full text-center text-muted-foreground py-8">

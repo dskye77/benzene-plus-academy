@@ -10,6 +10,7 @@ export async function GET(request) {
     const pageSize = searchParams.get("pageSize")
       ? Number(searchParams.get("pageSize"))
       : undefined;
+    const minScore = searchParams.get("minScore");
 
     if (!year) {
       return Response.json(
@@ -19,7 +20,28 @@ export async function GET(request) {
     }
 
     // Fetch all scorers for the given year
-    const allScorers = await fetchScorers(year);
+    let allScorers = await fetchScorers(year);
+
+    // Automatically sort by score from highest to lowest
+    allScorers = allScorers.slice().sort((a, b) => {
+      const scoreA = typeof a.score === "number" ? a.score : -Infinity;
+      const scoreB = typeof b.score === "number" ? b.score : -Infinity;
+      return scoreB - scoreA;
+    });
+    
+    // Filter out scorers that do not meet the minScore requirement if specified
+    let filteredScorers = allScorers;
+    if (minScore !== null && minScore !== undefined && minScore !== "") {
+      const minNum = Number(minScore);
+      if (!isNaN(minNum)) {
+        filteredScorers = allScorers.filter(
+          (scorer) => typeof scorer.score === "number" && scorer.score > minNum,
+        );
+      }
+    } else {
+      filteredScorers = allScorers;
+    }
+    allScorers = filteredScorers;
 
     // Support pagination if requested
     let pagedScorers = allScorers;

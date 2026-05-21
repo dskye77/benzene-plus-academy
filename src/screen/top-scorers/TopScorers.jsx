@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { Search, Trophy } from "lucide-react";
 import useScorersStore from "@/store/useScorers";
+import ScorerDisplay from "@/components/ScorerDisplay";
 
 const EXAMS = ["All", "JAMB", "WAEC", "NECO", "Post-UTME"];
 const MOCK_YEARS = [2026, 2025, 2024, 2023];
@@ -123,56 +124,11 @@ export default function TopScorers() {
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {filtered.map((s) => (
-              <ScorerCard key={`${s.id || s.name}-${s.year}`} scorer={s} />
+              <ScorerDisplay key={`${s.id || s.name}-${s.year}`} scorer={s} />
             ))}
           </div>
         )}
       </section>
     </>
-  );
-}
-
-function ScorerCard({ scorer: s }) {
-  const initials = s.name
-    .split(" ")
-    .map((n) => n[0])
-    .join("");
-
-  return (
-    <div className="group rounded-2xl border border-border bg-card overflow-hidden hover:shadow-elevated hover:-translate-y-1 transition-all">
-      <div className="aspect-4/5 relative">
-        {s.image ? (
-          <Image
-            src={s.image}
-            alt={s.name}
-            fill
-            className="object-cover"
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 20vw"
-          />
-        ) : (
-          <div className="absolute inset-0 gradient-hero flex items-center justify-center text-6xl font-display font-bold text-white/85">
-            {initials}
-          </div>
-        )}
-        <span className="absolute top-3 left-3 rounded-full bg-accent px-2.5 py-1 text-[10px] font-bold tracking-wider text-accent-foreground">
-          {s.exam}
-        </span>
-        <span className="absolute top-3 right-3 grid h-9 w-9 place-items-center rounded-full bg-white/15 text-white backdrop-blur">
-          <Trophy className="h-4 w-4" />
-        </span>
-      </div>
-      <div className="p-4">
-        <p className="text-sm font-semibold leading-snug">{s.name}</p>
-        <div className="mt-1 flex items-baseline justify-between">
-          <span className="text-3xl font-display font-bold text-primary">
-            {s.score}
-          </span>
-          <span className="text-xs text-muted-foreground">{s.year}</span>
-        </div>
-        {s.note && (
-          <p className="mt-1 text-[11px] text-accent font-semibold">{s.note}</p>
-        )}
-      </div>
-    </div>
   );
 }

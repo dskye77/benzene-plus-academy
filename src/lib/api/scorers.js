@@ -1,3 +1,4 @@
+import { uploadImage } from "./image";
 export async function fetchScorers() {
   const res = await fetch("/api/admin/scorers");
   if (!res.ok) throw new Error("Failed to fetch scorers");
@@ -5,22 +6,45 @@ export async function fetchScorers() {
 }
 
 export async function uploadScorer(scorer) {
-  const res = await fetch("/api/admin/scorers", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(scorer),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err?.error || "Failed to upload scorer");
+  try {
+    const imageFile = scorer?.selectedImageFile;
+    let imageUrl = "";
+    let publicId = "";
+
+    if (imageFile) {
+      const uploadResult = await uploadImage(imageFile, {
+        folder: "benzene-plus-academy/scorers",
+      });
+      imageUrl = uploadResult?.data?.secureUrl || "";
+      publicId = uploadResult?.data?.publicId || "";
+    }
+    // Remove selectedImageFile before sending to backend
+    const { selectedImageFile, ...scorerData } = scorer || {};
+
+    const res = await fetch("/api/admin/scorers", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...scorerData,
+        image: imageUrl,
+        imagePublicId: publicId,
+      }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err?.error || "Failed to upload scorer");
+    }
+    return res.json();
+  } catch (error) {
+    throw new Error(error.message || "Failed to upload scorer");
   }
-  return res.json();
 }
 
 /**
  * Deletes a scorer and, if the scorer has a Cloudinary image, deletes the image too.
  * @param {string} scorerId - The ID of the scorer to delete.
- * @param {string} [imagePublicId] - Optional: The public_id for the Cloudinary image.
+ * @param {string} [imagePublicId] - Optional: The publicId for the Cloudinary image.
  */
 export async function deleteScorer(scorerId, imagePublicId) {
   // 1. Delete scorer from backend

@@ -1,6 +1,6 @@
+import { admin } from "@/server/firebaseAdmin";
 import { isUserAdmin } from "@/server/firestoreAdmin";
 import { getUserFromSession } from "@/server/getUserSession";
-import { admin } from "@/server/firebaseAdmin";
 
 async function resolveParams(context) {
   return context?.params && typeof context.params.then === "function"
