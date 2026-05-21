@@ -291,13 +291,14 @@ function YearSection({ year, data, onDelete, onEdit }) {
 
 function ScorerCard({ scorer, onDelete, onEdit }) {
   const [deleting, setDeleting] = useState(false);
+  const [showDelete, setShowDelete] = useState(false);
 
   async function handleDelete() {
-    if (!confirm(`Delete ${scorer.name}?`)) return;
     setDeleting(true);
     try {
       await onDelete(scorer.id, scorer.imagePublicId);
       toast.success("Scorer deleted");
+      setShowDelete(false); // close modal after success
     } catch (err) {
       toast.error(err.message || "Failed to delete scorer");
     } finally {
@@ -312,7 +313,7 @@ function ScorerCard({ scorer, onDelete, onEdit }) {
 
   return (
     <div className="group rounded-2xl border p-0 flex flex-col items-center relative bg-card shadow-lg overflow-hidden">
-      {/* Photo or gradient placeholder */}
+      {/* IMAGE */}
       <div className="w-full h-[220px] relative bg-gray-100">
         {scorer.image ? (
           <Image
@@ -320,54 +321,71 @@ function ScorerCard({ scorer, onDelete, onEdit }) {
             alt={scorer.name}
             fill
             className="object-cover rounded-t-2xl"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
         ) : (
-          <div className="w-full h-full gradient-hero flex items-center justify-center text-4xl font-display font-bold text-white/85">
+          <div className="w-full h-full flex items-center justify-center text-4xl font-bold">
             {initials}
           </div>
         )}
       </div>
 
+      {/* CONTENT */}
       <div className="flex flex-col items-center w-full p-5">
-        <h3 className="font-bold text-lg text-center">{scorer.name}</h3>
+        <h3 className="font-bold text-lg">{scorer.name}</h3>
         <span className="mt-2 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
           {scorer.exam}
         </span>
         <p className="mt-3 text-3xl font-bold">{scorer.score}</p>
-        {scorer.note && (
-          <p className="mt-1 text-xs text-accent font-semibold">
-            {scorer.note}
-          </p>
-        )}
       </div>
 
-      {/* Action buttons (visible on hover) */}
-      <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+      {/* ACTIONS */}
+      <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 flex gap-1">
         <button
-          className="p-2 rounded-lg bg-white/80 backdrop-blur hover:bg-white"
+          className="p-2 rounded-lg bg-white/80"
           onClick={() => onEdit(scorer)}
-          title="Edit"
         >
           <Pencil className="h-4 w-4" />
         </button>
+
         <button
-          className="p-2 rounded-lg bg-white/80 backdrop-blur hover:bg-red-100 text-red-500 disabled:opacity-50"
-          onClick={handleDelete}
-          disabled={deleting}
-          title="Delete"
+          className="p-2 rounded-lg bg-white/80 text-red-500"
+          onClick={() => setShowDelete(true)}
         >
-          {deleting ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Trash2 className="h-4 w-4" />
-          )}
+          <Trash2 className="h-4 w-4" />
         </button>
       </div>
+
+      {/* DELETE MODAL */}
+      {showDelete && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-card w-full max-w-sm rounded-2xl p-5 border">
+            <h3 className="font-bold text-lg">Delete Scorer?</h3>
+            <p className="text-sm text-muted-foreground mt-2">
+              This action cannot be undone.
+            </p>
+
+            <div className="flex gap-2 mt-5">
+              <button
+                onClick={() => setShowDelete(false)}
+                className="flex-1 h-10 rounded-xl border"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="flex-1 h-10 rounded-xl bg-red-500 text-white flex items-center justify-center"
+              >
+                {deleting ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
-
 /* ─── EDIT MODAL ──────────────────────────────────────────────────────────── */
 
 function EditModal({ scorer, onClose, onSaved }) {

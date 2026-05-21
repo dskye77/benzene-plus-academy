@@ -19,7 +19,7 @@ export default function RootLayoutShell({ children }) {
   if (shouldHideLayout(pathname)) {
     return (
       <>
-        <Toaster position="top-center" richColors />
+        <Toaster position="top-center" closeButton richColors />
         {children}
       </>
     );
@@ -27,7 +27,7 @@ export default function RootLayoutShell({ children }) {
 
   return (
     <div>
-      <Toaster position="top-center" richColors />
+      <Toaster position="top-center" closeButton richColors />
       <Navbar />
       <div>{children}</div>
       <Footer />
