@@ -3,54 +3,28 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@/lib/firebase";
 import { GraduationCap, Loader2 } from "lucide-react";
+
+import { useAuth } from "@/hooks/useAuth";
 
 export default function AdminLoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") || "/admin";
 
+  const { signIn, loading, error, clearError } = useAuth();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
 
   async function handleLogin(e) {
     e.preventDefault();
-    setError("");
-    setLoading(true);
-
+    clearError();
     try {
-      // 1. Sign in with Firebase client SDK
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        email,
-        password,
-      );
-
-      // 2. Get the ID token
-      const idToken = await userCredential.user.getIdToken();
-
-      // 3. Exchange for a session cookie via your API
-      const res = await fetch("/api/admin/session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idToken }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || "Login failed");
-      }
-
-      // 4. Redirect to the admin page (or wherever they were going)
+      await signIn(email, password);
       router.replace(redirect);
-    } catch (err) {
-      setError(friendlyError(err.message));
-    } finally {
-      setLoading(false);
+    } catch {
+      // useAuth sets error state
     }
   }
 
@@ -86,6 +60,7 @@ export default function AdminLoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full rounded-lg border border-border bg-secondary/50 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition"
                 placeholder="admin@example.com"
+                onFocus={clearError}
               />
             </div>
 
@@ -102,6 +77,7 @@ export default function AdminLoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full rounded-lg border border-border bg-secondary/50 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition"
                 placeholder="••••••••"
+                onFocus={clearError}
               />
             </div>
 
@@ -124,21 +100,4 @@ export default function AdminLoginPage() {
       </div>
     </div>
   );
-}
-
-// Map Firebase/API error codes to friendly messages
-function friendlyError(msg = "") {
-  if (
-    msg.includes("invalid-credential") ||
-    msg.includes("wrong-password") ||
-    msg.includes("user-not-found")
-  )
-    return "Invalid email or password.";
-  if (msg.includes("too-many-requests"))
-    return "Too many attempts. Please wait a few minutes and try again.";
-  if (msg.includes("not an admin") || msg.includes("Forbidden"))
-    return "This account does not have admin access.";
-  if (msg.includes("network"))
-    return "Network error. Check your connection and try again.";
-  return msg || "Something went wrong. Please try again.";
 }

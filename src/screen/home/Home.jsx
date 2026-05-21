@@ -19,21 +19,13 @@ import heroImg from "@/assets/hero-students.jpg";
 import celebrateImg from "@/assets/students-celebrate.jpg";
 import tutorImg from "@/assets/tutor-teaching.jpg";
 import { Counter } from "@/components/site/Counter";
-import {
-  PROGRAMS,
-  SCORERS,
-  STATS,
-  TESTIMONIALS,
-  POSTS,
-  SITE,
-} from "@/lib/site";
+import { PROGRAMS, STATS, TESTIMONIALS, POSTS, SITE } from "@/lib/site";
 
 import useScorersStore from "@/store/useScorers";
 
 export default function Home() {
   const { scorers, setYear, fetchPage } = useScorersStore();
 
-  // Fetch initial page of scorers for 2026 on mount
   useEffect(() => {
     setYear(2026);
     fetchPage(1, true);
@@ -280,7 +272,6 @@ export default function Home() {
               Top scorers
             </p>
             <h2 className="mt-3 text-3xl md:text-4xl font-bold">
-              {/* You can update the headline as needed */}
               {scorers.length > 0
                 ? `${scorers.length} students scored above 300 in JAMB 2026.`
                 : "Top 2026 JAMB scorers will be announced soon."}
@@ -296,16 +287,26 @@ export default function Home() {
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {scorers.slice(0, 4).map((s) => (
             <div
-              key={s.name}
+              key={`${s.name}-${s.year}`}
               className="rounded-2xl border border-border bg-card overflow-hidden hover:shadow-card transition-shadow"
             >
-              <div className="aspect-4/5 gradient-hero relative">
-                <div className="absolute inset-0 grid place-items-center text-5xl font-display font-bold text-white/85">
-                  {s.name
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")}
-                </div>
+              <div className="aspect-4/5 relative">
+                {s.image ? (
+                  <Image
+                    src={s.image}
+                    alt={s.name}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 640px) 50vw, 25vw"
+                  />
+                ) : (
+                  <div className="absolute inset-0 gradient-hero flex items-center justify-center text-5xl font-display font-bold text-white/85">
+                    {s.name
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")}
+                  </div>
+                )}
                 <span className="absolute top-3 left-3 rounded-full bg-accent px-2.5 py-1 text-[10px] font-bold tracking-wider text-accent-foreground">
                   {s.exam}
                 </span>
@@ -404,8 +405,7 @@ export default function Home() {
           {POSTS.slice(0, 3).map((p) => (
             <Link
               key={p.slug}
-              href="/blog/$slug"
-              params={{ slug: p.slug }}
+              href={`/blog/${p.slug}`}
               className="group rounded-2xl border border-border bg-card overflow-hidden hover:shadow-card transition-shadow"
             >
               <div className="aspect-video bg-secondary relative overflow-hidden">

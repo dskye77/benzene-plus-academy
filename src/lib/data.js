@@ -3,14 +3,19 @@
  * @param {number|string} year - The year to fetch scorers for.
  * @param {number} targetPage - The page number to fetch.
  * @param {number} pageSize - The number of scorers per page.
- * @returns {Promise<{scorers: Array<Object>}>} - Resolves to an object containing an array of scorer objects.
+ * @returns {Promise<{scorers: Array<Object>, total: number}>}
  */
 export async function getScorersPaginated(year, targetPage, pageSize) {
-  const res = await fetch("/api/scorers", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ year, page: targetPage, pageSize }),
+  const params = new URLSearchParams({
+    year: String(year),
+    page: String(targetPage),
+    pageSize: String(pageSize),
   });
+
+  const res = await fetch(`/api/scorers?${params.toString()}`, {
+    method: "GET",
+  });
+
   if (!res.ok) {
     const { error, details } = await res.json().catch(() => ({}));
     throw new Error(
@@ -19,6 +24,7 @@ export async function getScorersPaginated(year, targetPage, pageSize) {
         : "Failed to fetch scorers (paginated)",
     );
   }
+
   const data = await res.json();
-  return { scorers: data.scorers || [] };
+  return { scorers: data.scorers || [], total: data.total || 0 };
 }

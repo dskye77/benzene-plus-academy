@@ -1,8 +1,8 @@
 "use client";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import AdminLogoutButton from "@/components/AdminLogoutButton";
+import { usePathname, useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
 import {
   LayoutDashboard,
   Trophy,
@@ -22,11 +22,42 @@ const NAV = [
   { href: "/admin/blog", label: "Blog", icon: FileText },
 ];
 
+// Custom logout button using useAuth
+function CustomLogoutButton() {
+  const { signOut } = useAuth();
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
+  const handleLogout = useCallback(async () => {
+    setLoading(true);
+    try {
+      await signOut();
+      router.replace("/login");
+    } catch (err) {
+      // Optionally, display an error/toast here (not required)
+    } finally {
+      setLoading(false);
+    }
+  }, [signOut, router]);
+
+  return (
+    <button
+      onClick={handleLogout}
+      disabled={loading}
+      className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:bg-secondary w-full disabled:opacity-50 transition"
+    >
+      <LogOut className="h-4 w-4" />
+      {loading ? "Signing out…" : "Sign out"}
+    </button>
+  );
+}
+
 export default function AdminLayout({ children }) {
+  const { user, isAdmin } = useAuth();
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  // Only renders nav links, with optional onNavigate handler.
+  // Only renders nav links, with optional onNavigate handler
   const renderNavLinks = (onNavigate) => (
     <>
       <nav className="flex-1 p-3 space-y-1">
@@ -54,7 +85,7 @@ export default function AdminLayout({ children }) {
         })}
       </nav>
       <div className="p-3 border-t border-border">
-        <AdminLogoutButton />
+        <CustomLogoutButton />
       </div>
     </>
   );
@@ -130,12 +161,21 @@ export default function AdminLayout({ children }) {
             <h1 className="font-display font-bold text-lg">Admin Dashboard</h1>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-xs text-muted-foreground hidden sm:block">
-              Signed in as admin
-            </span>
-            <span className="grid h-9 w-9 place-items-center rounded-full bg-primary text-primary-foreground text-sm font-semibold">
-              A
-            </span>
+            {user && (
+              <>
+                <span className="text-xs text-muted-foreground hidden sm:block">
+                  Signed in as {user.displayName || user.email}
+                </span>
+                <span className="grid h-9 w-9 place-items-center rounded-full bg-primary text-primary-foreground text-sm font-semibold">
+                  {(user.displayName
+                    ? user.displayName[0]
+                    : user.email
+                      ? user.email[0]
+                      : "A"
+                  ).toUpperCase()}
+                </span>
+              </>
+            )}
           </div>
         </header>
         <main className="flex-1 p-6 md:p-8">{children}</main>

@@ -1,12 +1,10 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
 import { Search, Trophy } from "lucide-react";
 import useScorersStore from "@/store/useScorers";
 
-// Exams filter list
 const EXAMS = ["All", "JAMB", "WAEC", "NECO", "Post-UTME"];
-
-// Hardcoded mock years for demo/testing
 const MOCK_YEARS = [2026, 2025, 2024, 2023];
 
 export default function TopScorers() {
@@ -14,32 +12,33 @@ export default function TopScorers() {
   const [exam, setExam] = useState("All");
   const [selectedYear, setSelectedYear] = useState(MOCK_YEARS[0]);
 
-  const { scorers, loading, error, year, setYear, reload, fetchPage } = useScorersStore();
+  const { scorers, loading, setYear, fetchPage } = useScorersStore();
 
-  // Only use mock years
-  const availableYears = MOCK_YEARS;
-
-  // Fetch initial data on mount, then refetch when year changes
   useEffect(() => {
     if (selectedYear != null) {
       setYear(selectedYear);
-      // Fetch the first page for the selected year, overwrite=true
       fetchPage(1, true);
     }
   }, [selectedYear, setYear, fetchPage]);
 
-  // Filter scorers for year, exam, and query
+  // Count scorers per year from the already-fetched list
+  // (the store holds one year at a time; show count for current year only)
+  const yearCount = useMemo(() => {
+    const counts = {};
+    MOCK_YEARS.forEach((yr) => {
+      counts[yr] = scorers.filter((s) => String(s.year) === String(yr)).length;
+    });
+    return counts;
+  }, [scorers]);
+
   const filtered = useMemo(() => {
-    let data = scorers;
-    if (selectedYear !== null) {
-      data = data.filter((s) => String(s.year) === String(selectedYear));
-    }
-    data = data.filter(
-      (s) =>
-        (exam === "All" || s.exam === exam) &&
-        s.name.toLowerCase().includes(q.toLowerCase()),
-    );
-    return data;
+    return scorers
+      .filter((s) => String(s.year) === String(selectedYear))
+      .filter(
+        (s) =>
+          (exam === "All" || s.exam === exam) &&
+          s.name.toLowerCase().includes(q.toLowerCase()),
+      );
   }, [scorers, selectedYear, exam, q]);
 
   return (
@@ -55,10 +54,9 @@ export default function TopScorers() {
           </h1>
           <p className="mt-5 max-w-2xl text-white/80 text-lg">
             <span className="font-bold text-accent">
-              {scorers.length} students
+              {filtered.length} student{filtered.length !== 1 ? "s" : ""}
             </span>{" "}
-            scored above 300 in JAMB {selectedYear || ""}. Search the full roll
-            below.
+            found for {selectedYear || "all years"}. Search the full roll below.
           </p>
         </div>
       </section>
@@ -92,7 +90,7 @@ export default function TopScorers() {
           </div>
         </div>
 
-        {/* Year Badges */}
+        {/* Year tabs */}
         <div className="flex flex-wrap gap-2 mt-5">
           {MOCK_YEARS.map((yr) => (
             <button
@@ -105,15 +103,11 @@ export default function TopScorers() {
               }`}
             >
               {yr}
-              <span
-                className={`ml-2 text-xs font-medium ${
-                  selectedYear === yr
-                    ? "text-primary-foreground/80"
-                    : "text-muted-foreground"
-                }`}
-              >
-                {scorers.filter((s) => String(s.year) === String(yr)).length}
-              </span>
+              {selectedYear === yr && (
+                <span className="ml-2 text-xs font-medium text-primary-foreground/80">
+                  {yearCount[yr]}
+                </span>
+              )}
             </button>
           ))}
         </div>
@@ -129,45 +123,56 @@ export default function TopScorers() {
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {filtered.map((s) => (
-              <div
-                key={`${s.name}-${s.year}`}
-                className="group rounded-2xl border border-border bg-card overflow-hidden hover:shadow-elevated hover:-translate-y-1 transition-all"
-              >
-                <div className="aspect-4/5 gradient-hero relative">
-                  <div className="absolute inset-0 grid place-items-center text-6xl font-display font-bold text-white/85">
-                    {s.name
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")}
-                  </div>
-                  <span className="absolute top-3 left-3 rounded-full bg-accent px-2.5 py-1 text-[10px] font-bold tracking-wider text-accent-foreground">
-                    {s.exam}
-                  </span>
-                  <span className="absolute top-3 right-3 grid h-9 w-9 place-items-center rounded-full bg-white/15 text-white backdrop-blur">
-                    <Trophy className="h-4 w-4" />
-                  </span>
-                </div>
-                <div className="p-4">
-                  <p className="text-sm font-semibold leading-snug">{s.name}</p>
-                  <div className="mt-1 flex items-baseline justify-between">
-                    <span className="text-3xl font-display font-bold text-primary">
-                      {s.score}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {s.year}
-                    </span>
-                  </div>
-                  {s.note && (
-                    <p className="mt-1 text-[11px] text-accent font-semibold">
-                      {s.note}
-                    </p>
-                  )}
-                </div>
-              </div>
+              <ScorerCard key={`${s.id || s.name}-${s.year}`} scorer={s} />
             ))}
           </div>
         )}
       </section>
     </>
+  );
+}
+
+function ScorerCard({ scorer: s }) {
+  const initials = s.name
+    .split(" ")
+    .map((n) => n[0])
+    .join("");
+
+  return (
+    <div className="group rounded-2xl border border-border bg-card overflow-hidden hover:shadow-elevated hover:-translate-y-1 transition-all">
+      <div className="aspect-4/5 relative">
+        {s.image ? (
+          <Image
+            src={s.image}
+            alt={s.name}
+            fill
+            className="object-cover"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 20vw"
+          />
+        ) : (
+          <div className="absolute inset-0 gradient-hero flex items-center justify-center text-6xl font-display font-bold text-white/85">
+            {initials}
+          </div>
+        )}
+        <span className="absolute top-3 left-3 rounded-full bg-accent px-2.5 py-1 text-[10px] font-bold tracking-wider text-accent-foreground">
+          {s.exam}
+        </span>
+        <span className="absolute top-3 right-3 grid h-9 w-9 place-items-center rounded-full bg-white/15 text-white backdrop-blur">
+          <Trophy className="h-4 w-4" />
+        </span>
+      </div>
+      <div className="p-4">
+        <p className="text-sm font-semibold leading-snug">{s.name}</p>
+        <div className="mt-1 flex items-baseline justify-between">
+          <span className="text-3xl font-display font-bold text-primary">
+            {s.score}
+          </span>
+          <span className="text-xs text-muted-foreground">{s.year}</span>
+        </div>
+        {s.note && (
+          <p className="mt-1 text-[11px] text-accent font-semibold">{s.note}</p>
+        )}
+      </div>
+    </div>
   );
 }

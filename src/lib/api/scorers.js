@@ -10,35 +10,40 @@ export async function uploadScorer(scorer) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(scorer),
   });
-  if (!res.ok) throw new Error("Failed to upload scorer");
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err?.error || "Failed to upload scorer");
+  }
   return res.json();
 }
 
 /**
- * Deletes a scorer and, if the scorer has a Cloudinary image, deletes the image from Cloudinary too.
+ * Deletes a scorer and, if the scorer has a Cloudinary image, deletes the image too.
  * @param {string} scorerId - The ID of the scorer to delete.
- * @param {string} [imagePublicId] - Optional: The public_id for the Cloudinary image to delete.
+ * @param {string} [imagePublicId] - Optional: The public_id for the Cloudinary image.
  */
 export async function deleteScorer(scorerId, imagePublicId) {
   // 1. Delete scorer from backend
   const res = await fetch(`/api/admin/scorers/${scorerId}`, {
     method: "DELETE",
   });
-  if (!res.ok) throw new Error("Failed to delete scorer");
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err?.error || "Failed to delete scorer");
+  }
 
+  // 2. Delete image from Cloudinary (non-blocking — correct endpoint)
   if (imagePublicId) {
     try {
-      const cloudinaryRes = await fetch(`/api/admin/imageDelete`, {
+      const cloudinaryRes = await fetch("/api/admin/deleteImage", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ publicId: imagePublicId }),
       });
       if (!cloudinaryRes.ok) {
-        // Optional: Logging or reporting error, but do not block scorer deletion on image failure
         console.error("Failed to delete image from Cloudinary");
       }
     } catch (error) {
-      // Optional: Logging or reporting error, but do not block scorer deletion on image failure
       console.error("Error deleting image from Cloudinary:", error);
     }
   }
