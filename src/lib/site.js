@@ -2,10 +2,11 @@ export const SITE = {
   name: "Benzene Plus Academy",
   shortName: "Benzene Plus",
   tagline: "Pass JAMB & WAEC With Confidence",
-  phone: "+234 803 000 0000",
-  whatsapp: "2348030000000",
+  phone: "+234 703 567 7936",
+  whatsapp: "2347035677936",
   email: "hello@benzeneplusacademy.ng",
-  address: "12 Scholars Avenue, Ibadan, Oyo State, Nigeria",
+  name: "Benzene Plus Tutorial",
+  address: "9 Kudeyibu St, Ijegun, Lagos 102213, Lagos, Nigeria",
 };
 
 export const NAV_LINKS = [
@@ -37,56 +38,45 @@ export const PROGRAMS = [
       "Government",
       "Literature",
     ],
-    schedule: "Mon – Sat · 8am – 4pm",
+    schedule: "Mon – Sat · Morning: 9am – 3pm | Evening: 4pm – 6pm",
     duration: "3 – 6 months",
   },
   {
     code: "WAEC",
     title: "WAEC Preparation",
-    blurb: "Full SSCE coverage with past-question clinics and practicals.",
-    subjects: ["All Science", "Commercial", "Arts subjects"],
-    schedule: "Mon – Fri · 3pm – 6pm",
+    blurb:
+      "Full SSCE syllabus coverage with past-question clinics and practicals.",
+    subjects: ["Science", "Commercial", "Arts subjects"],
+    schedule: "Mon – Fri · Morning: 9am – 3pm | Evening: 4pm – 6pm",
     duration: "Per term",
   },
   {
     code: "NECO",
     title: "NECO Preparation",
-    blurb: "Targeted revision and exam strategy for NECO candidates.",
-    subjects: ["Core + Electives"],
-    schedule: "Weekends",
-    duration: "10 weeks",
+    blurb:
+      "Targeted revision, practical prep, and exam strategy for NECO candidates.",
+    subjects: ["Core Subjects", "Electives"],
+    schedule: "Mon – Fri · Morning: 9am – 3pm | Evening: 4pm – 6pm",
+    duration: "2 – 3 months",
+  },
+  {
+    code: "GCE",
+    title: "GCE Preparation",
+    blurb:
+      "Focused remedial classes for private candidates sitting for Nov/Dec or Jan/Feb series.",
+    subjects: ["All Core & Elective subjects"],
+    schedule: "Mon – Sat · Morning: 9am – 3pm | Evening: 4pm – 6pm",
+    duration: "3 – 4 months",
   },
   {
     code: "POST-UTME",
     title: "Post-UTME Coaching",
-    blurb: "University-specific drills and aptitude question banks.",
-    subjects: ["Use of English", "Reasoning", "Subject combinations"],
-    schedule: "Holiday intensive",
+    blurb:
+      "University-specific drills, aptitude test practice, and speed runs.",
+    subjects: ["Use of English", "Critical Reasoning", "Subject combinations"],
+    schedule: "Mon – Sat · Morning: 9am – 3pm | Evening: 4pm – 6pm",
     duration: "4 – 6 weeks",
   },
-  {
-    code: "CBT",
-    title: "CBT Training",
-    blurb: "Hands-on computer-based test practice in our digital lab.",
-    subjects: ["Mock CBT", "Speed drills"],
-    schedule: "Daily slots",
-    duration: "Flexible",
-  },
-];
-
-export const SCORERS = [
-  { name: "Aisha Bello", exam: "JAMB", score: 342, year: 2025 },
-  { name: "Chinedu Okeke", exam: "JAMB", score: 336, year: 2025 },
-  { name: "Fatima Yusuf", exam: "WAEC", score: 9, year: 2024, note: "9 A1s" },
-  { name: "Tunde Adebayo", exam: "JAMB", score: 329, year: 2025 },
-  { name: "Grace Olamide", exam: "Post-UTME", score: 92, year: 2024 },
-  { name: "Ibrahim Musa", exam: "JAMB", score: 318, year: 2024 },
-  { name: "Blessing Eze", exam: "NECO", score: 8, year: 2024, note: "8 A1s" },
-  { name: "David Okon", exam: "JAMB", score: 311, year: 2025 },
-  { name: "Zainab Lawal", exam: "WAEC", score: 8, year: 2025, note: "8 A1s" },
-  { name: "Samuel Adeyemi", exam: "JAMB", score: 305, year: 2025 },
-  { name: "Halima Sani", exam: "Post-UTME", score: 89, year: 2025 },
-  { name: "Emmanuel Nwosu", exam: "JAMB", score: 301, year: 2024 },
 ];
 
 export const TESTIMONIALS = [

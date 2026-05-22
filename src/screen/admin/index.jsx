@@ -1,31 +1,24 @@
-import {
-  Trophy,
-  FileText,
-  Image as ImageIcon,
-  TrendingUp,
-} from "lucide-react";
+import Link from "next/link";
+import { Home, Trophy, FileText } from "lucide-react";
 
-const STATS = [
+const CARDS = [
   {
-    label: "Top scorers",
-    value: "312",
-    delta: "+47 in 2025",
+    label: "Home",
+    href: "/",
+    icon: Home,
+    tint: "bg-card text-primary",
+  },
+  {
+    label: "Top Scorers",
+    href: "/admin/top-scorers",
     icon: Trophy,
     tint: "bg-accent/10 text-accent",
   },
   {
-    label: "Blog posts",
-    value: "48",
-    delta: "4 drafts",
+    label: "Blog",
+    href: "/admin/blog",
     icon: FileText,
     tint: "bg-primary/10 text-primary",
-  },
-  {
-    label: "Gallery images",
-    value: "186",
-    delta: "+22 this month",
-    icon: ImageIcon,
-    tint: "bg-accent/10 text-accent",
   },
 ];
 
@@ -35,31 +28,25 @@ export default function Overview() {
       <div>
         <p className="text-sm text-muted-foreground">Welcome back</p>
         <h2 className="text-2xl font-bold mt-1">
-          Here&apos;s what&apos;s happening at Benzene Plus.
+          Quick admin navigation
         </h2>
       </div>
-
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {STATS.map((s) => (
-          <div
-            key={s.label}
-            className="rounded-2xl bg-card border border-border p-5"
+      <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+        {CARDS.map((card) => (
+          <Link
+            key={card.label}
+            href={card.href}
+            className="rounded-2xl bg-card border border-border p-6 flex items-center gap-4 transition-shadow hover:shadow-lg group"
           >
-            <div className="flex items-center justify-between">
-              <span
-                className={`grid h-10 w-10 place-items-center rounded-xl ${s.tint}`}
-              >
-                <s.icon className="h-5 w-5" />
-              </span>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </div>
-            <p className="mt-4 text-3xl font-display font-bold">{s.value}</p>
-            <p className="text-sm text-muted-foreground mt-0.5">{s.label}</p>
-            <p className="text-xs text-accent font-medium mt-2">{s.delta}</p>
-          </div>
+            <span
+              className={`grid h-12 w-12 place-items-center rounded-xl text-2xl ${card.tint} group-hover:scale-105 transition-transform`}
+            >
+              <card.icon className="h-6 w-6" />
+            </span>
+            <span className="text-lg font-medium">{card.label}</span>
+          </Link>
         ))}
       </div>
-
     </div>
   );
 }

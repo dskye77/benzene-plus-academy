@@ -22,7 +22,7 @@ import {
   addScorer,
   deleteScorer,
   updateScorer,
-} from "@/lib/api/scorers";
+} from "@/lib/admin/scorers";
 import {
   Dialog,
   DialogContent,
@@ -539,6 +539,8 @@ function AddModal({ open, onClose, onSaved }) {
   const [numCredits, setNumCredits] = useState("");
   const [subjects, setSubjects] = useState([]);
   const [note, setNote] = useState("");
+  const [about, setAbout] = useState("");
+  const [successStory, setSuccessStory] = useState("");
 
   const [preview, setPreview] = useState(null);
   const [selectedImageFile, setSelectedImageFile] = useState(null);
@@ -552,6 +554,8 @@ function AddModal({ open, onClose, onSaved }) {
     setNumCredits("");
     setSubjects([]);
     setNote("");
+    setAbout(""); // clear optional fields
+    setSuccessStory("");
   }
 
   function handleFileChange(e) {
@@ -581,6 +585,8 @@ function AddModal({ open, onClose, onSaved }) {
       score: scoreValue,
       year: Number(form.year),
       note: note.trim() || undefined,
+      about: about.trim() || undefined,
+      successStory: successStory.trim() || undefined,
       ...(subjectBreakdown.length ? { subjectBreakdown } : {}),
       ...(exam === "WAEC" || exam === "NECO"
         ? {
@@ -741,14 +747,43 @@ function AddModal({ open, onClose, onSaved }) {
             </div>
           )}
 
-          {/* Note Input */}
+          {/* About Input (optional) */}
           {exam && (
             <div>
               <FieldLabel optional>About this scorer</FieldLabel>
               <textarea
+                placeholder="e.g. Academic background, achievements, character..."
+                value={about}
+                onChange={(e) => setAbout(e.target.value)}
+                rows={3}
+                className="w-full border border-input rounded-xl px-4 py-2.5 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring transition resize-y min-h-[70px]"
+              />
+            </div>
+          )}
+
+          {/* Note Input */}
+          {exam && (
+            <div>
+              <FieldLabel optional>Additional Note</FieldLabel>
+              <input
+                type="text"
                 placeholder="e.g. Outstanding performance, Best in Chemistry..."
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
+                className="w-full border border-input rounded-xl px-4 py-2.5 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring transition min-h-[44px]"
+              />
+        
+            </div>
+          )}
+
+          {/* Success Story Input (optional) */}
+          {exam && (
+            <div>
+              <FieldLabel optional>Success Story</FieldLabel>
+              <textarea
+                placeholder="e.g. How this scorer achieved their results, journey, milestones..."
+                value={successStory}
+                onChange={(e) => setSuccessStory(e.target.value)}
                 rows={3}
                 className="w-full border border-input rounded-xl px-4 py-2.5 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring transition resize-y min-h-[70px]"
               />
@@ -757,7 +792,7 @@ function AddModal({ open, onClose, onSaved }) {
 
           {/* Image Upload Input Area */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center rounded-xl border p-4 bg-muted/10">
-            <div className="relative w-full aspect-video rounded-lg border overflow-hidden bg-secondary/30">
+            <div className="relative w-full aspect-4/3 rounded-lg border overflow-hidden bg-secondary/30">
               {preview ? (
                 <Image
                   src={preview}
@@ -1095,6 +1130,8 @@ function EditModal({ open, scorer, onClose, onSaved }) {
     year: String(scorer.year || ""),
     score: String(scorer.score || ""),
     note: scorer.note || "",
+    about: scorer.about || "",
+    successStory: scorer.successStory || "",
   });
 
   const [numDistinctions, setNumDistinctions] = useState(
@@ -1129,6 +1166,8 @@ function EditModal({ open, scorer, onClose, onSaved }) {
         score: isWaecOrNeco ? Number(numDistinctions) || 0 : Number(form.score),
         year: Number(form.year),
         note: form.note.trim() || undefined,
+        about: form.about?.trim() || undefined,
+        successStory: form.successStory?.trim() || undefined,
         image: scorer.image,
         imagePublicId: scorer.imagePublicId,
       };
@@ -1263,11 +1302,35 @@ function EditModal({ open, scorer, onClose, onSaved }) {
           </div>
 
           <div>
+            <label className="text-xs font-semibold">About this scorer</label>
+            <textarea
+              value={form.about}
+              onChange={(e) => setForm((p) => ({ ...p, about: e.target.value }))}
+              placeholder="e.g. Academic background, achievements, character..."
+              rows={3}
+              className="mt-1.5 w-full rounded-xl border px-4 py-3 text-sm resize-y min-h-[80px]"
+            />
+          </div>
+
+          <div>
             <label className="text-xs font-semibold">Additional Note</label>
             <textarea
               value={form.note}
               onChange={(e) => setForm((p) => ({ ...p, note: e.target.value }))}
               placeholder="e.g. Outstanding performance..."
+              rows={3}
+              className="mt-1.5 w-full rounded-xl border px-4 py-3 text-sm resize-y min-h-[80px]"
+            />
+          </div>
+
+          <div>
+            <label className="text-xs font-semibold">Success Story</label>
+            <textarea
+              value={form.successStory}
+              onChange={(e) =>
+                setForm((p) => ({ ...p, successStory: e.target.value }))
+              }
+              placeholder="e.g. How this scorer achieved their results, journey, milestones..."
               rows={3}
               className="mt-1.5 w-full rounded-xl border px-4 py-3 text-sm resize-y min-h-[80px]"
             />

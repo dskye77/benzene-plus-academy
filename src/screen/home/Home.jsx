@@ -24,10 +24,11 @@ import { PROGRAMS, STATS, TESTIMONIALS, SITE } from "@/lib/site";
 
 import { getAllScorersWithMinScore } from "@/lib/client/scorers";
 
-import {  fetchPublishedBlogs } from "@/lib/client/blogs"; 
+import { fetchPublishedBlogs } from "@/lib/client/blogs";
 
 export default function Home() {
   const [scorers, setScorers] = useState([]);
+  const [topScorer, setTopScorer] = useState(null);
   // Add state for fetched posts
   const [latestPosts, setLatestPosts] = useState([]);
 
@@ -35,6 +36,7 @@ export default function Home() {
     const getScorers = async () => {
       const data = await getAllScorersWithMinScore(2026, 300);
       setScorers(data?.scorers || []);
+      setTopScorer(data?.scorers[0] || null);
       console.log(data);
     };
     getScorers();
@@ -146,15 +148,19 @@ export default function Home() {
                 className="aspect-5/4 w-full object-cover"
               />
             </div>
-            <div className="absolute -bottom-5 -left-5 hidden sm:flex items-center gap-3 rounded-2xl bg-card text-card-foreground p-4 shadow-elevated border border-border">
-              <span className="grid h-11 w-11 place-items-center rounded-xl bg-accent/15 text-accent">
-                <Trophy className="h-5 w-5" />
-              </span>
-              <div>
-                <p className="text-xs text-muted-foreground">Top JAMB 2025</p>
-                <p className="text-base font-bold">Aisha Bello · 342</p>
+            {topScorer && (
+              <div className="absolute -bottom-5 -left-5 hidden sm:flex items-center gap-3 rounded-2xl bg-card text-card-foreground p-4 shadow-elevated border border-border">
+                <span className="grid h-11 w-11 place-items-center rounded-xl bg-accent/15 text-accent">
+                  <Trophy className="h-5 w-5" />
+                </span>
+                <div>
+                  <p className="text-xs text-muted-foreground">Top JAMB 2026</p>
+                  <p className="text-base font-bold">
+                    {topScorer.name} · {topScorer.score}
+                  </p>
+                </div>
               </div>
-            </div>
+            )}
           </motion.div>
         </div>
       </section>
@@ -263,7 +269,11 @@ export default function Home() {
                 <dl className="mt-5 space-y-1.5 text-xs">
                   <div className="flex justify-between">
                     <dt className="text-muted-foreground">Schedule</dt>
-                    <dd className="font-medium">{p.schedule}</dd>
+                    <dd className="font-medium">
+                      {p.schedule.split("|").map((line, i) => (
+                        <div key={i}>{line.trim()}</div>
+                      ))}
+                    </dd>
                   </div>
                   <div className="flex justify-between">
                     <dt className="text-muted-foreground">Duration</dt>
@@ -399,7 +409,6 @@ export default function Home() {
                     src={p.image ?? tutorImg}
                     width={500}
                     height={280}
-               
                     alt=""
                     loading="lazy"
                     className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"

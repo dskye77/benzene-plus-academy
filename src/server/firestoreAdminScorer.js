@@ -1,7 +1,5 @@
 import { admin } from "@/server/firebaseAdmin";
 
-
-
 /**
  * Gets all scorers from the "scorers" collection using Firebase Admin SDK.
  * @returns {Promise<Array<Object>>} An array of scorer objects, each including its document id.
@@ -36,13 +34,40 @@ export async function fetchScorers(year) {
 }
 
 /**
+ * Fetches a single scorer by document ID from the "scorers" collection using Firebase Admin SDK.
+ * @param {string} scorerId - The document ID of the scorer to fetch.
+ * @returns {Promise<Object|null>} The scorer object (with id) or null if not found.
+ */
+export async function fetchScorer(scorerId) {
+  if (!scorerId) {
+    throw new Error("Scorer ID is required to fetch scorer.");
+  }
+  const docRef = admin.firestore().collection("scorers").doc(scorerId);
+  const docSnapshot = await docRef.get();
+  if (!docSnapshot.exists) {
+    return null;
+  }
+  return { id: docSnapshot.id, ...docSnapshot.data() };
+}
+
+/**
  * Adds a new scorer to the "scorers" collection using Firebase Admin SDK.
  * @param {Object} scorerData - The fields for the scorer (name, exam, score, year, etc).
  * @returns {Promise<string>} The document id of the added scorer
  */
-export async function addScorer(scorerData) {
-  const docRef = await admin.firestore().collection("scorers").add(scorerData);
-  return docRef.id;
+export async function addScorer(scorerData, id) {
+  if (!id) {
+    throw new Error("Scorer id is required.");
+  }
+  const docRef = admin.firestore().collection("scorers").doc(id);
+
+  const docSnapshot = await docRef.get();
+  if (docSnapshot.exists) {
+    throw new Error("Scorer with this id already exists.");
+  }
+
+  await docRef.set(scorerData);
+  return id;
 }
 
 /**

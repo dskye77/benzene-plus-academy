@@ -29,7 +29,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
-import { getBlogs, createBlog, updateBlog, deleteBlog } from "@/lib/api/blog";
+import { getBlogs, createBlog, updateBlog, deleteBlog } from "@/lib/admin/blog";
 
 const CATEGORIES = [
   "Announcement",

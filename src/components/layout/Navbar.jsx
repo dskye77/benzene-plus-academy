@@ -1,16 +1,19 @@
 "use client";
-import Link from "next/link";
-import { Menu, X } from "lucide-react";
 import { useState, useEffect } from "react";
+import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { Menu, X } from "lucide-react";
+
+import { useAuth } from "@/hooks/useAuth";
 import { NAV_LINKS, SITE } from "@/lib/site";
 import { cn } from "@/lib/utils";
-import Image from "next/image";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
+  const { user } = useAuth();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -23,6 +26,14 @@ export default function Navbar() {
     if (href === "/") return pathname === "/";
     return pathname.startsWith(href) && href !== "/";
   };
+
+  // Add dashboard link to NAV_LINKS if authenticated, otherwise NAV_LINKS only
+  const showLinks = user
+    ? [
+        ...NAV_LINKS,
+        { to: "/admin", label: "Dashboard" }
+      ]
+    : NAV_LINKS;
 
   return (
     <header
@@ -43,7 +54,6 @@ export default function Navbar() {
               src="/logo.svg"
               width={40}
               height={40}
-         
               alt="Benzene Plus Academy"
               className="h-full w-full object-contain"
               priority
@@ -60,7 +70,7 @@ export default function Navbar() {
         </Link>
 
         <nav className="hidden md:flex items-center gap-1">
-          {NAV_LINKS.map((l) => (
+          {showLinks.map((l) => (
             <Link
               key={l.to}
               href={l.to}
@@ -74,16 +84,18 @@ export default function Navbar() {
           ))}
         </nav>
 
-        <div className="hidden md:flex items-center gap-2">
-          <a
-            href={`https://wa.me/${SITE.whatsapp}`}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex h-10 items-center justify-center rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 transition"
-          >
-            Register Now
-          </a>
-        </div>
+        {!user && (
+          <div className="hidden md:flex items-center gap-2">
+            <a
+              href={`https://wa.me/${SITE.whatsapp}`}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex h-10 items-center justify-center rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 transition"
+            >
+              Register Now
+            </a>
+          </div>
+        )}
 
         <button
           onClick={() => setOpen((v) => !v)}
@@ -97,7 +109,7 @@ export default function Navbar() {
       {open && (
         <div className="md:hidden border-t border-border bg-background">
           <div className="container-page py-4 flex flex-col gap-1">
-            {NAV_LINKS.map((l) => (
+            {showLinks.map((l) => (
               <Link
                 key={l.to}
                 href={l.to}
@@ -110,14 +122,16 @@ export default function Navbar() {
                 {l.label}
               </Link>
             ))}
-            <a
-              href={`https://wa.me/${SITE.whatsapp}`}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-2 inline-flex h-11 items-center justify-center rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground"
-            >
-              Register Now
-            </a>
+            {!user && (
+              <a
+                href={`https://wa.me/${SITE.whatsapp}`}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-2 inline-flex h-11 items-center justify-center rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground"
+              >
+                Register Now
+              </a>
+            )}
           </div>
         </div>
       )}

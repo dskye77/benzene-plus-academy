@@ -6,7 +6,6 @@ export async function fetchScorers() {
   return res.json();
 }
 
-
 export async function addScorer(scorer) {
   try {
     const imageFile = scorer?.selectedImageFile;
@@ -112,7 +111,8 @@ export async function deleteScorer(scorerId, imagePublicId) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ publicId: imagePublicId }),
       });
-      if (!cloudinaryRes.ok) {
+      const result = await cloudinaryRes.json().catch(() => ({}));
+      if (!cloudinaryRes.ok || !result?.success) {
         console.error("Failed to delete image from Cloudinary");
       }
     } catch (error) {

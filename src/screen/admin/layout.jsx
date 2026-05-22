@@ -7,7 +7,6 @@ import { useAuth } from "@/hooks/useAuth";
 import {
   LayoutDashboard,
   Trophy,
-  BookOpen,
   FileText,
   LogOut,
   GraduationCap,
@@ -18,8 +17,7 @@ import { cn } from "@/lib/utils";
 
 const NAV = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard },
-  { href: "/admin/scores", label: "Top Scorers", icon: Trophy },
-  { href: "/admin/programs", label: "Programs", icon: BookOpen },
+  { href: "/admin/top-scorers", label: "Top Scorers", icon: Trophy },
   { href: "/admin/blog", label: "Blog", icon: FileText },
 ];
 

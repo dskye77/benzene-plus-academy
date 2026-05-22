@@ -4,7 +4,6 @@ import Link from "next/link";
 import tutorImg from "@/assets/tutor-teaching.jpg";
 import { useEffect, useState } from "react";
 import { fetchPublishedBlogs } from "@/lib/client/blogs";
-
 import { toast } from "sonner";
 
 export default function Blog() {
@@ -33,21 +32,42 @@ export default function Blog() {
     };
   }, []);
 
+  const hero = (
+    <section className="relative gradient-hero text-primary-foreground">
+      <div className="absolute inset-0 bg-grid-fade opacity-25" />
+      <div className="relative container-page py-20 md:py-24">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">
+          Blog & news
+        </p>
+        <h1 className="mt-3 text-4xl md:text-5xl font-bold max-w-3xl leading-tight">
+          Exam updates, study tips & academy news.
+     
+        </h1>
+      </div>
+    </section>
+  );
+
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-24 text-muted-foreground">
-        <span className="text-5xl mb-4 animate-bounce">📰</span>
-        <h2 className="text-2xl font-bold mb-2">Loading blog...</h2>
-      </div>
+      <>
+        {hero}
+        <div className="flex flex-col items-center justify-center py-24 text-muted-foreground">
+          <span className="text-5xl mb-4 animate-bounce">📰</span>
+          <h2 className="text-2xl font-bold mb-2">Loading blog...</h2>
+        </div>
+      </>
     );
   }
 
   if (!blogs || blogs.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-24 text-muted-foreground">
-        <span className="text-5xl mb-4">📰</span>
-        <h2 className="text-2xl font-bold mb-2">No blogs available</h2>
-      </div>
+      <>
+        {hero}
+        <div className="flex flex-col items-center justify-center py-24 text-muted-foreground">
+          <span className="text-5xl mb-4">📰</span>
+          <h2 className="text-2xl font-bold mb-2">No blogs available</h2>
+        </div>
+      </>
     );
   }
 
@@ -55,19 +75,7 @@ export default function Blog() {
 
   return (
     <>
-      <section className="relative gradient-hero text-primary-foreground">
-        <div className="absolute inset-0 bg-grid-fade opacity-25" />
-
-        <div className="relative container-page py-20 md:py-24">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">
-            Blog & news
-          </p>
-
-          <h1 className="mt-3 text-4xl md:text-5xl font-bold max-w-3xl leading-tight">
-            JAMB updates, study tips & academy news.
-          </h1>
-        </div>
-      </section>
+      {hero}
 
       {featured && (
         <section className="container-page py-16">

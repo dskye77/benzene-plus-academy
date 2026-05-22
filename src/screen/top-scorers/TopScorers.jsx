@@ -1,7 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import Image from "next/image";
-import { Search, Trophy } from "lucide-react";
+import { Search } from "lucide-react";
 import useScorersStore from "@/store/useScorers";
 import ScorerDisplay from "@/components/ScorerDisplay";
 

@@ -59,3 +59,15 @@ export async function getAllScorersWithMinScore(year, minScore) {
   const data = await res.json();
   return { scorers: data.scorers || [], total: data.total || 0 };
 }
+
+// Fetch a single scorer by ID (assumes route exists: /api/admin/scorers/:id)
+export async function fetchScorer(id) {
+  if (!id) throw new Error("Scorer ID is required");
+  const res = await fetch(`/api/scorers/${id}`);
+
+  if (!res.ok) throw new Error("Failed to fetch scorer");
+
+  const data = await res.json();
+
+  return { ...data?.scorer };
+}
