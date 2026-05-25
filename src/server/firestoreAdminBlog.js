@@ -59,7 +59,7 @@ export async function addPost(data) {
   await admin
     .firestore()
     .collection(COLLECTION)
-    .doc(data.slug) // Set the document ID explicitly to the slug
+    .doc(data.slug)
     .set({
       ...data,
       createdAt: now,

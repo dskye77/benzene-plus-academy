@@ -61,7 +61,7 @@ export default function Home() {
         <div className="absolute inset-0 bg-grid-fade opacity-30" />
         <div className="relative container-page py-20 md:py-28 grid lg:grid-cols-2 gap-12 items-center text-primary-foreground">
           <div>
-            <motion.div
+            {/* <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
@@ -69,7 +69,7 @@ export default function Home() {
             >
               <Sparkles className="h-3.5 w-3.5 text-accent" />
               JAMB 2026 registration now open
-            </motion.div>
+            </motion.div> */}
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
